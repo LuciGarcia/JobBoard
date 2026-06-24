@@ -4,7 +4,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Variables de entorno y secretos (¡CRÍTICO NO SUBIR!)
+
+
+# Variables de entorno
 .env
 .env.local
 .env.development.local

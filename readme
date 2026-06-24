@@ -18,6 +18,15 @@ Plataforma web modular para conectar empresas con candidatos mediante perfiles d
 ### Pasos para iniciar
 
 1. **Clonar el repositorio e ingresar:**
-   ```bash
-   cd job-board
-   ```
+   `cd job-board`
+
+2. **Levantar la Base de Datos (Docker):**
+   `docker compose up -d`
+
+3. **Configurar el Backend:**
+   - Ir a la carpeta backend/.
+   - Crear un archivo .env basado en .env.example.
+     -Instalar dependencias e iniciar el servidor de desarrollo:
+     `cd backend
+    npm install
+    npm run dev`
