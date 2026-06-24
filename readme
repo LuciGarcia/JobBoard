@@ -1,0 +1,23 @@
+# Tablero de Ofertas Laborales (Job Board API)
+
+Plataforma web modular para conectar empresas con candidatos mediante perfiles diferenciados y gestión de postulaciones.
+
+## Tecnologías utilizadas
+
+- **Backend:** Node.js, Express, JavaScript (ES Modules).
+- **Base de Datos:** PostgreSQL (corriendo en Docker).
+- **Autenticación:** JSON Web Tokens (JWT) y encriptación con Bcrypt.
+
+## Configuración del Entorno Local
+
+### Requisitos Previos
+
+- Node.js (versión LTS)
+- Docker Desktop
+
+### Pasos para iniciar
+
+1. **Clonar el repositorio e ingresar:**
+   ```bash
+   cd job-board
+   ```
