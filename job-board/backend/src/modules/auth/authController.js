@@ -3,6 +3,24 @@ import authService from "./authService.js";
 
 const router = express.Router();
 
+const authenticate = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Token no proporcionado." });
+  }
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "secret_key_temporal",
+    );
+    req.user = decoded;
+    next();
+  } catch {
+    return res.status(401).json({ error: "Token inválido o expirado." });
+  }
+};
+
 // Endpoint: POST /api/v1/auth/register
 router.post("/register", async (req, res) => {
   try {
@@ -41,6 +59,16 @@ router.post("/login", async (req, res) => {
     res.status(200).json(data);
   } catch (error) {
     res.status(401).json({ error: error.message });
+  }
+});
+
+// GET /api/v1/auth/me
+router.get("/me", authenticate, async (req, res) => {
+  try {
+    const result = await authService.getMe(req.user.userId);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(404).json({ error: error.message });
   }
 });
 

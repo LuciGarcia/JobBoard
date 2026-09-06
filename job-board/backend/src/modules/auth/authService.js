@@ -78,7 +78,7 @@ class AuthService {
 
     // Generar el token JWT incluyendo id y rol
     const payload = { userId: user.id, role: user.role };
-    const token = jwt.sign(
+    const access_token = jwt.sign(
       payload,
       process.env.JWT_SECRET || "secret_key_temporal",
       {
@@ -87,9 +87,19 @@ class AuthService {
     );
 
     return {
-      token,
+      access_token: access_token,
       user: { id: user.id, email: user.email, role: user.role },
     };
+  }
+
+  async getMe(userId) {
+    const result = await pool.query(
+      "SELECT id, email, role FROM users WHERE id = $1 AND is_active = true",
+      [userId],
+    );
+    const user = result.rows[0];
+    if (!user) throw new Error("Usuario no encontrado.");
+    return user;
   }
 }
 

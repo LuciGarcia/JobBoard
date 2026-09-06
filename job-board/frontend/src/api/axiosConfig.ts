@@ -3,7 +3,7 @@ import axios from "axios";
 // Creamos una instancia de Axios preconfigurada
 const api = axios.create({
   // La URL base de tu backend Express. Ajustá el puerto si es diferente.
-  baseURL: "http://localhost:3000/api",
+  baseURL: "http://localhost:8000/api/v1",
   headers: {
     "Content-Type": "application/json",
   },

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/layout/Navbar";
@@ -21,52 +21,59 @@ import CandidateDashboard from "./pages/candidate/CandidateDashboard";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1, // Si falla un pedido, reintentá 1 vez
-      staleTime: 1000 * 30, // Considera los datos "frescos" por 30 segundos
+      retry: 1,
+      staleTime: 1000 * 30,
     },
   },
 });
 
+// Rutas donde NO queremos mostrar la Navbar
+// (login y registro tienen su propio diseño de pantalla completa)
+const ROUTES_WITHOUT_NAVBAR = ["/login", "/register"];
+
+function Layout() {
+  const location = useLocation();
+  const hideNavbar = ROUTES_WITHOUT_NAVBAR.includes(location.pathname);
+
+  return (
+    <>
+      {!hideNavbar && <Navbar />}
+      <main>
+        <Routes>
+          <Route path="/" element={<JobListPage />} />
+          <Route path="/jobs" element={<JobListPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+
+          <Route
+            path="/company/dashboard"
+            element={
+              <ProtectedRoute allowedRole="company">
+                <CompanyDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/candidate/dashboard"
+            element={
+              <ProtectedRoute allowedRole="candidate">
+                <CandidateDashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </main>
+    </>
+  );
+}
+
 function App() {
   return (
-    // QueryClientProvider: hace que React Query esté disponible en toda la app
     <QueryClientProvider client={queryClient}>
-      {/* AuthProvider: hace que el contexto de auth esté disponible en toda la app */}
       <AuthProvider>
-        {/* BrowserRouter: activa el sistema de rutas */}
+        {/* BrowserRouter debe envolver todo lo que use rutas o el hook useLocation */}
         <BrowserRouter>
-          <div className="min-h-screen bg-gray-50">
-            <Navbar />
-            <main>
-              <Routes>
-                {/* Rutas públicas (cualquiera puede acceder) */}
-                <Route path="/" element={<JobListPage />} />
-                <Route path="/jobs" element={<JobListPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
-
-                {/* Rutas de empresa (solo accede quien tenga rol 'company') */}
-                <Route
-                  path="/company/dashboard"
-                  element={
-                    <ProtectedRoute allowedRole="company">
-                      <CompanyDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Rutas de candidato (solo accede quien tenga rol 'candidate') */}
-                <Route
-                  path="/candidate/dashboard"
-                  element={
-                    <ProtectedRoute allowedRole="candidate">
-                      <CandidateDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </main>
-          </div>
+          <Layout />
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>

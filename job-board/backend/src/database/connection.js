@@ -4,45 +4,54 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-dotenv.config();
-
-const { Pool } = pg;
-
-// Utilidades para resolver rutas relativas en ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Cargamos el .env
+const envPath = path.join(__dirname, "..", "..", ".env");
+const result = dotenv.config({ path: envPath });
+
+console.log("DB_PASSWORD:", process.env.DB_PASSWORD);
+console.log("DB_PORT:", process.env.DB_PORT);
+console.log("Ruta .env:", envPath);
+
+if (result.error) {
+  console.error("No se pudo cargar el .env desde:", envPath);
+} else {
+  console.log("Variables de entorno cargadas desde:", envPath);
+}
+
+const { Pool } = pg;
+
 const pool = new Pool({
-  user: process.env.DB_USER || "jobboard_user",
-  host: process.env.DB_HOST || "localhost",
-  database: process.env.DB_NAME || "jobboard_db",
-  password: process.env.DB_PASSWORD || "jobboard_password123",
-  port: process.env.DB_PORT || 5432,
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: Number(process.env.DB_PORT), // Convertimos a número explícitamente
 });
 
-// Función para inicializar las tablas
+// Verificar conexión e inicializar tablas
 const initDatabase = async () => {
   try {
     const sqlPath = path.join(__dirname, "init.sql");
     const sqlScript = fs.readFileSync(sqlPath, "utf8");
-
     await pool.query(sqlScript);
-    console.log("Tablas de la Base de Datos verificadas/creadas con éxito.");
+    console.log("Tablas verificadas/creadas con éxito.");
   } catch (err) {
-    console.error(
-      "Error al inicializar las tablas de la base de datos:",
-      err.message,
-    );
+    console.error("Error al inicializar las tablas:", err.message);
   }
 };
 
-// Verificar conexión e inicializar
 pool.query("SELECT NOW()", async (err, res) => {
   if (err) {
     console.error("Error crítico al conectar a PostgreSQL:", err.stack);
   } else {
-    console.log("Conexión a PostgreSQL establecida con éxito.");
-    await initDatabase(); // Ejecuta el script SQL
+    console.log(
+      "Conexión a PostgreSQL establecida. Servidor:",
+      res.rows[0].now,
+    );
+    await initDatabase();
   }
 });
 
